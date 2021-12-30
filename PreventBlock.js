@@ -345,7 +345,6 @@ function main() {
         } else throw LanguageManager['invalidType'];
       case "deposit":
         var BlockKey = PreventCore.assignKey(args[1].toLowerCase(), false);
-        var OreKey = PreventCore.assignKey(args[1].toLowerCase(), true);
         if(args[2].toLowerCase() != 'all' || isNaN(parseInt(args[2])) || parseInt(amount) < 1)
           throw LanguageManager['invalidInt'];
         else {
@@ -376,6 +375,23 @@ function main() {
             }
           }); Scheduler.runTask(Host, new Depository()); return 0;
         }
+      case "withdraw":
+        var BlockKey = PreventCore.assignKey(args[1].toLowerCase(), false);
+        var Balance = PreventBlockUser.getBlockCount(BlockKey);
+        var Pattern = /^\d{1,4}$/g; var MaxMap = new HashMap();
+        for(var x = 0; x < 36; x++) {
+          var Stack = Player.getInventory().getItem(x);
+          if(Stack == null || Stack.getAmount() == 64)
+            continue;
+          else if(Stack.getType().name() == BlockKey) {
+            MaxMap.put(x, 64 - Stack.getAmount());
+          } else continue;
+        }
+        if(args[2].toLowerCase() == "all") {
+          // Fill inventory or take everything
+        } else if(args[2].search(Pattern) != -1) {
+          // Get n blocks from database
+        } else throw LanguageManager['invalidAction'];
     }
   } catch(err) {
     return LanguageManager.prefix + err.name;
