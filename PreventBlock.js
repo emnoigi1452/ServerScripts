@@ -71,6 +71,7 @@ var LanguageManager = {
   compressedSuccessful: "&fĐã nén thành công &a%ores% %type% &fthành &a%product% %block%&f!",
   compressAllBegin: "&aGhi chú: &f&oBắt đầu nén tất cả khoáng sản trong kho...",
   depositSuccessful: "&fĐã gửi thành công &a%amount% %type% &fvào kho!",
+  withdrawSuccessful: "&fĐã rút thành công &a%amount% %type% &ftừ kho!"
 }
 
 var PreventCore = {
@@ -381,16 +382,59 @@ function main() {
         var Pattern = /^\d{1,4}$/g; var MaxMap = new HashMap();
         for(var x = 0; x < 36; x++) {
           var Stack = Player.getInventory().getItem(x);
-          if(Stack == null || Stack.getAmount() == 64)
+          if(Stack == null)
+            MaxMap.put(x, 64);
+          else if(Stack.getAmount() == 64)
             continue;
           else if(Stack.getType().name() == BlockKey) {
             MaxMap.put(x, 64 - Stack.getAmount());
           } else continue;
         }
         if(args[2].toLowerCase() == "all") {
-          // Fill inventory or take everything
+          var ProcessFull = Java.extend(Runnable, {
+            run: function() {
+              var UserInventory = Player.getInventory(); var Loaded = 0;
+              for each(var ValidLoad in MaxMap.keySet()) {
+                var Max = MaxMap.get(ValidLoad); var Default = Max;
+                if(Max >= Balance) {
+                  Max = Balance; Balance = 0;
+                } else Balance -= Max;
+                var SlotCurrent = 64 - Default; var NewCount = SlotCurrent + Max;
+                var StackInstance = new ItemStack(Material.getMaterial(BlockKey), NewCount);
+                UserInventory.setItem(ValidLoad, StackInstance); Loaded += Max;
+                if(Balance == 0) break;
+              }
+              PreventBlockUser.setBlockCount(BlockKey, Balance);
+              Player.sendMessage(LanguageManager.getScriptMessage(
+                "withdrawSuccessful")
+                .replace("%amount%", PreventCore.formatNumber(Loaded))
+                .replace("%type%", PreventCore.translateKey(BlockKey)));
+            }
+          }); Scheduler.runTask(Host, new ProcessFull()); return 1; 
         } else if(args[2].search(Pattern) != -1) {
-          // Get n blocks from database
+          var ProcessPart = Java.extend(Runnable, {
+            run: function() {
+              var IntegerNode = parseInt(args[2]); var TotalLoaded = 0;
+              var PlayerInv = Player.getInventory();
+              if(IntegerNode > Balance)
+                IntegerNode = Balance;
+              for each(var ValidSlot in MaxMap.keySet()) {
+                var MaxGive = MaxMap.get(ValidSlot); var OriginalVal = MaxGive;
+                if(MaxGive >= IntegerNode) {
+                  MaxGive = IntegerNode; IntegerNode = 0;
+                } else IntegerNode -= MaxGive;
+                var SlotSize = 64 - OriginalVal; var NewSize = SlotSize + MaxGive;
+                var ReplaceStack = new ItemStack(Material.getMaterial(BlockKey), NewSize);
+                PlayerInv.setItem(ValidSlot, ReplaceStack); TotalLoaded += MaxGive;
+                if(IntegerNode == 0) break;
+              }
+              PreventBlockUser.setBlockCount(BlockKey, IntegerNode);
+              Player.sendMessage(LanguageManager.getScriptMessage(
+                "withdrawSuccessful")
+              .replace("%amount%", PreventCore.formatNumber(TotalLoaded))
+              .replace("%type%", PreventCore.translateKey(BlockKey)));
+            }
+          }); Scheduler.runTask(Host, new ProcessPart()); return 0;
         } else throw LanguageManager['invalidAction'];
     }
   } catch(err) {
