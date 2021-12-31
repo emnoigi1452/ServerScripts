@@ -62,6 +62,8 @@ var LanguageManager = {
   },
   invalidType: "&cLỗi: &fLoại khoáng sản không hợp lệ!",
   invalidAction: "&cLỗi: &fLệnh phụ không hợp lệ! Hãy kiểm tra lại code!",
+  invalidPlayer: "&cLỗi: &fNgười chơi không tồn tại! Vui lòng thử lại!",
+  invalidTarget: "&cLỗi: &fNgười chơi không được phép dùng tính năng!",
   noPermission: "&cLỗi: &fBạn không có quyền dùng!",
   dependMissing: "&cLỗi: &fMáy chủ không có đủ phần mềm để triển khai!",
   vaultError: "&cLỗi: &fKhông thể kết nối với hệ thống Vault!",
@@ -71,7 +73,12 @@ var LanguageManager = {
   compressedSuccessful: "&fĐã nén thành công &a%ores% %type% &fthành &a%product% %block%&f!",
   compressAllBegin: "&aGhi chú: &f&oBắt đầu nén tất cả khoáng sản trong kho...",
   depositSuccessful: "&fĐã gửi thành công &a%amount% %type% &fvào kho!",
-  withdrawSuccessful: "&fĐã rút thành công &a%amount% %type% &ftừ kho!"
+  withdrawSuccessful: "&fĐã rút thành công &a%amount% %type% &ftừ kho!",
+  staffLoadedAll: "&fQuản trị viên đã tăng tất cả loại khoáng sản trong kho bạn thêm &a%amount%&f!",
+  staffLoaded: "&fBạn đã nhận được &a%amount% %type% &ftừ một quản trị viên &b:)",
+  staffRemoveAll: "&cQuản trị viên đã rút &a%amount% &ftừ tất cả các khoáng sản trong kho của bạn!",
+  staffRemove: "&fQuản trị viên đã rút &a%amount% %type% &ftừ kho của bạn!",
+  modificationSuccess: "&fChỉnh sửa dữ liệu của &a%player% &fthành công&f!"
 }
 
 var PreventCore = {
@@ -410,7 +417,7 @@ function main() {
                 .replace("%amount%", PreventCore.formatNumber(Loaded))
                 .replace("%type%", PreventCore.translateKey(BlockKey)));
             }
-          }); Scheduler.runTask(Host, new ProcessFull()); return 1; 
+          }); Scheduler.runTask(Host, new ProcessFull()); return 1;
         } else if(args[2].search(Pattern) != -1) {
           var ProcessPart = Java.extend(Runnable, {
             run: function() {
@@ -436,6 +443,77 @@ function main() {
             }
           }); Scheduler.runTask(Host, new ProcessPart()); return 0;
         } else throw LanguageManager['invalidAction'];
+      case "give":
+      case "add":
+        if(args.length != 3) throw LanguageManager['invalidAction'];
+        var User = Server.getOfflinePlayer(args[1]); var IntegerPattern = /^\d{1,10}$/g;
+        var HandleAll = args[2].toLowerCase() == "all";
+        if(!User.hasPlayedBefore())
+          throw LanguageManager['invalidPlayer'];
+        if(!User.hasPermission("pblock.use"))
+          throw LanguageManager['invalidTarget'];
+        if(args[2].search(IntegerPattern) == -1)
+          throw LanguageManager['invalidInt'];
+        var IntegerAllow = parseInt(args[3]);
+        var UserDatabase = new File(ScriptHost + User.getUniqueId().toString().concat(".yml"));
+        var TargetConfiguration = YamlConfiguration.loadConfiguration(UserDatabase);
+        if(HandleAll) {
+          var ModAllTask = Java.extend(Runnable, {
+            run: function() {
+              for each(var ModType in PreventCore.blockKeys(false)) {
+                var AccessKey = "BlockData".concat(ModType);
+                var Current = TargetConfiguration.get(AccessKey);
+                TargetConfiguration.set(AccessKey, Current + IntegerAllow);
+              }; TargetConfiguration.save(UserDatabase);
+              if(!User.isOnline())
+                User.sendMessage(LanguageManager.getScriptMessage("staffLoadedAll")
+                .replace("%amount%", PreventCore.formatNumber(IntegerAllow)));
+              Player.sendMessage(LanguageManager.getScriptMessage("modificationSuccess")
+              .replace("%player%", User.getName()));
+            }
+          }); Scheduler.runTask(Host, new ModAllTask()); return 0;
+        } else {
+          var AccessId = PreventCore.assignKey(args[2].toLowerCase(), true);
+          var SingleModTask = Java.extend(Runnable, {
+            run: function() {
+              var DatabaseAccess = "BlockData".concat(AccessId);
+              var CurrentVal = TargetConfiguration.get(DatabaseAccess);
+              TargetConfiguration.set(DatabaseAccess, CurrentVal + IntegerAllow);
+              if(!User.isOnline())
+                User.sendMessage(LanguageManager.getScriptMessage("staffLoaded")
+                .replace("%amount%", PreventCore.formatNumber(IntegerAllow))
+                .replace("%type%", PreventCore.translateKey(BlockKey)));
+              Player.sendMessage(LanguageManager.getScriptMessage("modificationSuccess").replace("%player%", User.getName()));
+            }
+          }); Scheduler.runTask(Host, new SingleModTask()); return 0;
+        }
+      case "remove":
+      case "subtract":
+        if(args.length == 3) throw LanguageManager['invalidAction'];
+        var Target = Server.getOfflinePlayer(args[1]); var Pattern = /^\d{1,10}$/g;
+        var All = args[2].toLowerCase() == "all";
+        if(!User.hasPlayedBefore())
+          throw LanguageManager['invalidPlayer'];
+        if(!User.hasPermission("pblock.use"))
+          throw LanguageManager['invalidTarget'];
+        if(args[3].search(Pattern) == -1)
+          throw LanguageManager['invalidInt'];
+        var RemoveNode = parseInt(args[3]);
+        var TargetDatabase = new File(ScriptHost + Player.getUniqueId().toString().concat(".yml"));
+        var TargetConfig = YamlConfiguration.loadConfiguration(TargetDatabase);
+        if(All) {
+          var SubAllTask = Java.extend(Runnable, {
+            run: function() {
+              // Do subtraction to all block types
+            }
+          }); Scheduler.runTask(Host, new SubAllTask()); return 0;
+        } else {
+          var SubTypeTask = Java.extend(Runnable, {
+            run: function() {
+              // Do subtraction for only one type of block
+            }
+          })
+        }
     }
   } catch(err) {
     return LanguageManager.prefix + err.name;
