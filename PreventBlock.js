@@ -82,7 +82,11 @@ var LanguageManager = {
   modificationSuccess: "&fChỉnh sửa dữ liệu của &a%player% &fthành công&f!",
   confirmReset: "&fVui lòng bấm lại lệnh để tiến hành reset!",
   databaseReset: "&fDữ liệu kho của bạn đã bị quét sạch bởi quản trị viên!",
-  resetComplete: "&fĐã hoàn tất quá trình quét sạch dữ liệu!"
+  resetComplete: "&fĐã hoàn tất quá trình quét sạch dữ liệu!",
+  syncComplete: "&fĐã chuyển đổi &a%amount% %type% &fsang kho đũa ma thuật!",
+  sendComplete: "&fĐã gửi cho &e%target% &a%amount% %type%&f!",
+  sendReceive: "&fĐã nhận được &a%amount% %type% &ftừ &e%send%",
+  sellComplete: "&fĐã bán &a%amount% %type%&f. Bạn nhận được &a$%money%&f!"
 }
 
 var PreventCore = {
@@ -354,7 +358,7 @@ function main() {
               }
             }); Scheduler.runTask(Host, new SingleTypeProcess()); return 0;
           }
-        } else throw LanguageManager['invalidType'];
+        } else throw LanguageManager['invalidType']; return 0;
       case "deposit":
         var BlockKey = PreventCore.assignKey(args[1].toLowerCase(), false);
         if(args[2].toLowerCase() != 'all' || isNaN(parseInt(args[2])) || parseInt(amount) < 1)
@@ -373,7 +377,10 @@ function main() {
             }
             else continue;
           }
-          if(Loadable == 0) throw LanguageManager['notEnoughMinerals'];
+          if(Loadable == 0) {
+            Player.sendMessage(LanguageManager.getScriptMessage("notEnoughMinerals").replace("%type%", PreventCore.translateKey(BlockKey)));
+            return -1;
+          }
           Loadable = Loadable > IntegerNode ? IntegerNode : Loadable;
           var Depository = Java.extend(Runnable, {
             run: function() {
@@ -390,6 +397,10 @@ function main() {
       case "withdraw":
         var BlockKey = PreventCore.assignKey(args[1].toLowerCase(), false);
         var Balance = PreventBlockUser.getBlockCount(BlockKey);
+        if(Balance < 1) {
+          Player.sendMessage(LanguageManager.getScriptMessage("notEnoughMinerals").replace("%type%", PreventCore.translateKey(BlockKey)));
+          return -1;
+        }
         var Pattern = /^\d{1,4}$/g; var MaxMap = new HashMap();
         for(var x = 0; x < 36; x++) {
           var Stack = Player.getInventory().getItem(x);
@@ -452,12 +463,12 @@ function main() {
         if(args.length != 3) throw LanguageManager['invalidAction'];
         var User = Server.getOfflinePlayer(args[1]); var IntegerPattern = /^\d{1,10}$/g;
         var HandleAll = args[2].toLowerCase() == "all";
-        if(!User.hasPlayedBefore())
-          throw LanguageManager['invalidPlayer'];
-        if(!User.hasPermission("pblock.use"))
-          throw LanguageManager['invalidTarget'];
-        if(args[2].search(IntegerPattern) == -1)
-          throw LanguageManager['invalidInt'];
+        if(!User.hasPlayedBefore()) {
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidPlayer")); return -1; }
+        if(!User.hasPermission("pblock.use")) {
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidTarget")); return -1; }
+        if(args[2].search(IntegerPattern) == -1) {
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidInt")); return -1; }
         var IntegerAllow = parseInt(args[3]);
         var UserDatabase = new File(ScriptHost + User.getUniqueId().toString().concat(".yml"));
         var TargetConfiguration = YamlConfiguration.loadConfiguration(UserDatabase);
@@ -496,12 +507,12 @@ function main() {
         if(args.length == 3) throw LanguageManager['invalidAction'];
         var Target = Server.getOfflinePlayer(args[1]); var Pattern = /^\d{1,10}$/g;
         var All = args[2].toLowerCase() == "all";
-        if(!User.hasPlayedBefore())
-          throw LanguageManager['invalidPlayer'];
-        if(!User.hasPermission("pblock.use"))
-          throw LanguageManager['invalidTarget'];
-        if(args[3].search(Pattern) == -1)
-          throw LanguageManager['invalidInt'];
+        if(!User.hasPlayedBefore()) {
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidPlayer")); return -1; }
+        if(!User.hasPermission("pblock.use")) {
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidTarget")); return -1; }
+        if(args[3].search(Pattern) == -1) {
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidInt")); return -1; }
         var RemoveNode = parseInt(args[3]); var DefaultRoll = RemoveNode;
         var TargetDatabase = new File(ScriptHost + Target.getUniqueId().toString().concat(".yml"));
         var TargetConfig = YamlConfiguration.loadConfiguration(TargetDatabase);
@@ -571,6 +582,87 @@ function main() {
             }
           }); Scheduler.runTask(Host, new ResetTask()); return 0;
         }
+      case "towand":
+      case "syncwand":
+        var SuperiorCore = Host.getDataFolder().getAbsolutePath() + "\\javascripts\\superior.js";
+        if(!SuperiorCore.exists())
+          throw LanguageManager['dependMissing'];
+        if(!Player.hasPermission("superiorwand.universal")) {
+          Player.sendMessage(LanguageManager.getScriptMessage("noPermission")); return -1; }
+        var TypeName = args[1].toLowerCase();
+        if(['iron', 'gold', 'diamond', 'emerald'].indexOf(TypeName) == -1) {
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidType")); return -1; }
+        else {
+          var SyncTask = Java.extend(Runnable, {
+            run: function() {
+              var Balance = PreventBlockUser.getBlockCount(PreventCore.assignKey(TypeName, false));
+              var Syntax = "javascript_superior_add," + TypeName + "," + Balance.toString();
+              PlaceholderAPI.static.setPlaceholders(Player, "%" + Syntax + "%");
+              PreventBlockUser.setBlockCount(PreventCore.assignKey(TypeName, false), 0);
+              Player.sendMessage(LanguageManager.getScriptMessage("syncComplete")
+              .replace("%amount%", PreventCore.formatNumber(Balance))
+              .replace("%type%", PreventCore.translateKey(PreventCore.assignKey(TypeName, false))));
+            }
+          }); Scheduler.runTask(Host, new SyncTask()); return 0;
+        }
+      case "pay":
+      case "send":
+        var Target = Server.getOfflinePlayer(args[1]);
+        if(!Target.hasPlayedBefore()) {
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidPlayer")); return -1; }
+        if(!Target.hasPermission("pblock.use")) {
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidTarget")); return -1; }
+        var Key = PreventCore.assignKey(args[2].toLowerCase(), false);
+        if(args[3].toLowerCase().search(/^\d{1,10}$/g) == -1) {
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidInt")); return -1; }
+        var SendAmount = parseInt(args[3]); var Balance = PreventBlockUser.getBlockCount(Key);
+        if(SendAmount > Balance) {
+          Player.sendMessage(LanguageManager.getScriptMessage("notEnoughMinerals").replace("%type%", PreventCore.translateKey(Key)));
+        } else {
+          var TargetFile = new File(ScriptHost, Target.getUniqueId().toString().concat(".yml"));
+          if(!TargetFile.exists()) TargetFile = PreventCore.setupDefaultFile(TargetFile);
+          var TargetConfig = YamlConfiguration.loadConfiguration(TargetFile);
+          var Root = "BlockData".concat(Key); var Count = TargetConfig.get(Root);
+          TargetConfig.set(Root, Count + SendAmount); TargetConfig.save(TargetFile);
+          PreventBlockUser.setBlockCount(Key, Balance - SendAmount);
+          Player.sendMessage(LanguageManager.getScriptMessage("sendComplete")
+          .replace("%target%", Target.getName())
+          .replace("%amount%", PreventCore.formatNumber(SendAmount))
+          .replace("%type%", PreventCore.translateKey(Key)));
+          if(Target.isOnline())
+            Target.sendMessage(LanguageManager.getScriptMessage("sendReceive")
+            .replace("%send%", Player.getName())
+            .replace("%amount%", PreventCore.formatNumber(SendAmount))
+            .replace("%type%", PreventCore.translateKey(Key)));
+        }; return 0;
+      case "sell":
+        var DataKey = PreventCore.assignKey(args[1].toLowerCase(), false);
+        var All = args[2].toLowerCase() == "all";
+        if(!All && args[2].search(/^\d{1,9}$/g) == -1) {
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidInt")); return -1; }
+        var Balance = PreventBlockUser.getBlockCount(DataKey);
+        var SellCount = All ? Balance : parseInt(args[2]);
+        if(SellCount > Balance) SellCount = Balance;
+        var PriceBoard = {
+          COAL_BLOCK: 76.5,
+          LAPIS_BLOCK: 85.5,
+          REDSTONE_BLOCK: 85.5,
+          IRON_BLOCK: 108,
+          GOLD_BLOCK: 112.5,
+          DIAMOND_BLOCK: 135,
+          EMERALD_BLOCK: 180
+        }
+        var SellTask = Java.extend(Runnable, {
+          run: function() {
+            var Receive = SellCount * PriceBoard[DataKey];
+            EconomyHost.depositPlayer(Player.getName(), Receive);
+            PreventBlockUser.setBlockCount(DataKey, Balance - SellCount);
+            Player.sendMessage(LanguageManager.getScriptMessage("sellComplete")
+            .replace("%amount%", PreventCore.formatNumber(SellCount))
+            .replace("%type%", PreventCore.translateKey(DataKey))
+            .replace("%money%", PreventCore.formatNumber(Receive)));
+          }
+        }); Scheduler.runTask(Host, new SellTask()); return 0;
     }
   } catch(err) {
     return LanguageManager.prefix + err.name;
