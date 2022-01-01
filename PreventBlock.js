@@ -53,6 +53,7 @@ var ArrayList = Java.type("java.util.ArrayList");
 var HashMap = Java.type("java.util.HashMap");
 var Runnable = Java.type("java.lang.Runnable");
 var Thread = Java.type("java.lang.Thread");
+var System = Java.type("java.lang.System");
 var UUID = Java.type("java.util.UUID");
 
 var LanguageManager = {
@@ -78,7 +79,10 @@ var LanguageManager = {
   staffLoaded: "&fBạn đã nhận được &a%amount% %type% &ftừ một quản trị viên &b:)",
   staffRemoveAll: "&cQuản trị viên đã rút &a%amount% &ftừ tất cả các khoáng sản trong kho của bạn!",
   staffRemove: "&fQuản trị viên đã rút &a%amount% %type% &ftừ kho của bạn!",
-  modificationSuccess: "&fChỉnh sửa dữ liệu của &a%player% &fthành công&f!"
+  modificationSuccess: "&fChỉnh sửa dữ liệu của &a%player% &fthành công&f!",
+  confirmReset: "&fVui lòng bấm lại lệnh để tiến hành reset!",
+  databaseReset: "&fDữ liệu kho của bạn đã bị quét sạch bởi quản trị viên!",
+  resetComplete: "&fĐã hoàn tất quá trình quét sạch dữ liệu!"
 }
 
 var PreventCore = {
@@ -498,21 +502,74 @@ function main() {
           throw LanguageManager['invalidTarget'];
         if(args[3].search(Pattern) == -1)
           throw LanguageManager['invalidInt'];
-        var RemoveNode = parseInt(args[3]);
-        var TargetDatabase = new File(ScriptHost + Player.getUniqueId().toString().concat(".yml"));
+        var RemoveNode = parseInt(args[3]); var DefaultRoll = RemoveNode;
+        var TargetDatabase = new File(ScriptHost + Target.getUniqueId().toString().concat(".yml"));
         var TargetConfig = YamlConfiguration.loadConfiguration(TargetDatabase);
         if(All) {
           var SubAllTask = Java.extend(Runnable, {
             run: function() {
-              // Do subtraction to all block types
+              for each(var MaterialKey in PreventCore.blockKeys(false)) {
+                var AccessBlockKey = "BlockData".concat(MaterialKey);
+                var Balance = TargetConfig.get(AccessBlockKey);
+                if(Balance <= RemoveNode) RemoveNode = Balance;
+                TargetConfig.set(AccessBlockKey, Balance - RemoveNode);
+                RemoveNode = DefaultRoll;
+              }
+              TargetConfig.save(TargetDatabase);
+              if(!Target.isOnline())
+                Target.sendMessage(LanguageManager.getScriptMessage("staffRemoveAll")
+                .replace("%amount%", PreventCore.formatNumber(DefaultRoll)));
+              Player.sendMessage(LanguageManager.getScriptMessage("modificationSuccess").replace("%player%", Target.getName()));
             }
           }); Scheduler.runTask(Host, new SubAllTask()); return 0;
         } else {
+          var AssignedKey = PreventCore.assignKey(args[2].toLowerCase(), false);
           var SubTypeTask = Java.extend(Runnable, {
             run: function() {
-              // Do subtraction for only one type of block
+              var DatabaseKey = "BlockData.".concat(AssignedKey);
+              var Balance = TargetConfig.get(DatabaseKey);
+              if(Balance <= RemoveNode) RemoveNode = Balance;
+              TargetConfig.set(DatabaseKey, Balance - RemoveNode); TargetConfig.save(TargetDatabase);
+              if(!Target.isOnline())
+                Target.sendMessage(LanguageManager.getScriptMessage("staffRemove")
+                .replace("%amount%", PreventCore.formatNumber(RemoveNode)))
+                .replace("%type%", PreventCore.translateKey(AssignedKey));
+              Player.sendMessage(LanguageManager.getScriptMessage("modificationSuccess").replace("%player%", Target.getName()));
             }
-          })
+          }); Scheduler.runTask(Host, new SubTypeTask()); return 1;
+        }
+      case "reset":
+        var SetupResetConfirm = Java.extend(Runnable, {
+          run: function() {
+            var TimeOutLimit = 30; // Free to edit, counted by (seconds)
+            var CurrentTime = System.currentTimeMillis();
+            var Expired = CurrentTime + Math.floor(TimeOutLimit * 1000);
+            var ResetData = new FixedMetadataValue(Host, Expired);
+            Player.setMetadata("ResetTimeOut", ResetData);
+          }
+        }); var Present = System.currentTimeMillis();
+        if(!Player.hasMetadata("ResetTimeOut") || Present > Player.getMetadata("ResetTimeOut").get(0).value()) {
+          Scheduler.runTask(Host, new SetupResetConfirm());
+          Player.sendMessage(LanguageManager.getScriptMessage("confirmReset"));
+          return 0;
+        } else {
+          Player.removeMetadata("ResetTimeOut", Host);
+          var ResetTask = Java.extend(Runnable, {
+            run: function() {
+              for each(var DataFiles in ScriptHost.listFiles()) {
+                if(!DataFiles.isDirectory()) {
+                  var DataConfig = YamlConfiguration.loadConfiguration(DataFiles);
+                  var Owner = Server.getOfflinePlayer(DataConfig.get("Owner"));
+                  for each(var BlockParam in PreventCore.blockKeys(false)) {
+                    DataConfig.set("BlockData".concat(BlockParam), 0);
+                  }; DataConfig.set("Merchant.Enabled", false); DataConfig.save(DataFiles);
+                  if(!Owner.isOnline())
+                    Owner.sendMessage(LanguageManager.getScriptMessage("databaseReset"));
+                } else continue;
+              }
+              Player.sendMessage(LanguageManager.getScriptMessage("resetComplete"));
+            }
+          }); Scheduler.runTask(Host, new ResetTask()); return 0;
         }
     }
   } catch(err) {
