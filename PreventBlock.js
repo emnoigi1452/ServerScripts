@@ -65,6 +65,8 @@ var LanguageManager = {
   invalidAction: "&cLỗi: &fLệnh phụ không hợp lệ! Hãy kiểm tra lại code!",
   invalidPlayer: "&cLỗi: &fNgười chơi không tồn tại! Vui lòng thử lại!",
   invalidTarget: "&cLỗi: &fNgười chơi không được phép dùng tính năng!",
+  invalidData: "&cLỗi: &fDữ liệu nhập vào không hợp lệ!",
+  invalidWandBlock: "&cLỗi: &fChỉ có thể đổi &fSắt, &6Vàng&f, &bKim cương&f, &aLục Bảo",
   noPermission: "&cLỗi: &fBạn không có quyền dùng!",
   dependMissing: "&cLỗi: &fMáy chủ không có đủ phần mềm để triển khai!",
   vaultError: "&cLỗi: &fKhông thể kết nối với hệ thống Vault!",
@@ -86,7 +88,8 @@ var LanguageManager = {
   syncComplete: "&fĐã chuyển đổi &a%amount% %type% &fsang kho đũa ma thuật!",
   sendComplete: "&fĐã gửi cho &e%target% &a%amount% %type%&f!",
   sendReceive: "&fĐã nhận được &a%amount% %type% &ftừ &e%send%",
-  sellComplete: "&fĐã bán &a%amount% %type%&f. Bạn nhận được &a$%money%&f!"
+  sellComplete: "&fĐã bán &a%amount% %type%&f. Bạn nhận được &a$%money%&f!",
+  helpDisplay: "&fĐang hiển thị bảng trợ giúp cho &bPreventBlock&f!"
 }
 
 var PreventCore = {
@@ -295,6 +298,43 @@ function main() {
       throw LanguageManager['invalidUserData'];
     // Main part of the code - where everything is executed...
     switch(args[0].toLowerCase()) {
+      // Help manual because some staffs can't read the source code
+      // Expected to be implemented to MyCommands
+      case "help":
+        var BoolCheck = function(param) {
+          switch(param.toLowerCase()) {
+            case "true": return true;
+            case "false": return false;
+            default: throw LanguageManager['invalidData'];
+          }; return false;
+        }
+        var HelpAdmin = BoolCheck(args[1].toLowerCase());
+        var Message = LanguageManager.getScriptMessage("helpDisplay").concat("\n");
+        if(HelpAdmin) {
+          Message += "&f&o- Gửi khoáng sản cho người chơi:\n"
+          Message += "&f &f /pb give/add &a<Người chơi> <Khoáng sản/All> <Số lượng>\n"
+          Message += "&f&o- Thu khoáng sản của người chơi:\n"
+          Message += "&f &f /pb remove/subtract &a<Người chơi> <Khoáng sản/All> <Số lượng>\n"
+          Message += "&f&o- Reset toàn bộ dữ liệu người chơi:\n"
+          Message += "&f &f /pb reset &7&o(Yêu cầu xác nhận)\n"
+          Message += "&f&m &m &m &m &m &m &m &m &m &m &M &m &m &m &m &m &m &m &m &m &m &m &m &m &m"
+        } else {
+          Message += "&f&o- Tiến hành nén khoáng sản thành khối:\n"
+          Message += "&f &f /pb condense &a<Khoáng sản>\n"
+          Message += "&f&o- Gửi khối khoáng sản vào kho chứa:\n"
+          Message += "&f &f /pb deposit &a<Khoáng sản> <Số lượng/All>\n"
+          Message += "&f&o- Rút khối khoáng sản từ kho chứa:\n"
+          Message += "&f &f /pb withdraw &a<Khoáng sản> <Số lượng/All>\n"
+          Message += "&f&o- Gửi khối khoáng sản cho người chơi khác:\n"
+          Message += "&f &f /pb pay/send &a<Khoáng sản> <Số lượng>\n"
+          Message += "&f&o- Chuyển tất cả khối khoáng sản sang đũa ma thuật:\n"
+          Message += "&f &f /pb syncwand/towand &a<Khoáng sản>\n"
+          Message += "&f&o- Bán khoáng sản trong kho chứa khối:\n"
+          Message += "&f &f /pb sell &a<Khoáng sản> <Số lượng/All>\n"
+          Message += "\n&f &c&oLưu ý: &f&oĐể xem lệnh quản trị viên, hãy dùng &b&o/pb admin"
+          Message += "&f&m &m &m &m &m &m &m &m &m &m &M &m &m &m &m &m &m &m &m &m &m &m &m &m &m"
+        }
+        Player.sendMessage(ChatColor[ColorParam]('&', Message)); return 0;
       case "condense":
       case "compress":
         var PlayerUserData = Player.getMetadata("playerData").get(0).value();
@@ -591,7 +631,7 @@ function main() {
           Player.sendMessage(LanguageManager.getScriptMessage("noPermission")); return -1; }
         var TypeName = args[1].toLowerCase();
         if(['iron', 'gold', 'diamond', 'emerald'].indexOf(TypeName) == -1) {
-          Player.sendMessage(LanguageManager.getScriptMessage("invalidType")); return -1; }
+          Player.sendMessage(LanguageManager.getScriptMessage("invalidWandBlock")); return -1; }
         else {
           var SyncTask = Java.extend(Runnable, {
             run: function() {
@@ -663,6 +703,9 @@ function main() {
             .replace("%money%", PreventCore.formatNumber(Receive)));
           }
         }); Scheduler.runTask(Host, new SellTask()); return 0;
+      case "up-prestige":
+        // Set up a system to obtain 'Shards', which are used to prestige in PreventBlock
+        break;
     }
   } catch(err) {
     return LanguageManager.prefix + err.name;
