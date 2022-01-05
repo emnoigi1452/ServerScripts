@@ -162,12 +162,13 @@ var PreventCore = {
   }
 }
 
-function PreventUser(name, data, market, marketmanager, tierhandler) {
+function PreventUser(name, data, market, marketmanager, tierhandler, shards) {
   this.userName = name;
   this.database = data;
   this.merchant = market;
   this.shopconfig = marketmanager;
   this.tierhandler = tierhandler;
+  this.shards = shards;
   this.getUserName() = function() {
     return this.userName;
   }
@@ -213,15 +214,23 @@ function PreventUser(name, data, market, marketmanager, tierhandler) {
   this.getMultiplier = function(tier) {
     return Math.floor(1*10 + (tier)) / 10;
   }
-  this.getBlockCount() = function(key) {
+  this.getBlockCount = function(key) {
     if(this.database.keySet().contains(key)) {
       return PreventCore.formatNumber(this.database.get(key));
     } else throw LanguageManager['invalidType'];
   }
-  this.setBlockCount() = function(key, value) {
+  this.setBlockCount = function(key, value) {
     if(!this.database.keySet().contains(key))
       throw LanguageManager['invalidType'];
     else this.database.put(key, value);
+  }
+  this.getShards = function() {
+    return this.shards;
+  }
+  this.setShards = function(amount) {
+    if(isNaN(parseInt(amount)))
+      throw LanguageManager['invalidInt'];
+    else this.shards = Math.abs(amount);
   }
 }
 
@@ -257,7 +266,7 @@ function main() {
           return -1;
         } else {
           var DataOrigin = new File(ScriptHost + Player.getUniqueId().toString().concat(".yml"));
-          var DataHash = new HashMap(); var ShopNode; var ShopHash = new HashMap(); var TierHash;
+          var DataHash = new HashMap(); var ShopNode; var ShopHash = new HashMap(); var TierHash; var Shards = 0;
           // Oh god I hate data-mapping so much :( my hand hurts
           if(!DataOrigin.exists()) {
             ShopNode = false;
@@ -266,6 +275,7 @@ function main() {
             TierHash.put("Allowed", false);
             TierHash.put("Level", 0);
             TierHash.put("Limit", 0);
+
           } else {
             var DataConfiguration = YamlConfiguration.loadConfiguration(DataOrigin);
             ShopNode = DataConfiguration.get("Merchant.Enabled"); var key = "BlockData.";
@@ -282,8 +292,9 @@ function main() {
             TierHash.put("Level", DataConfiguration.get("Tier.Level"));
             TierHash.put("EXP", DataConfiguration.get("Tier.EXP"));
             TierHash.put("Limit", DataConfiguration.get("Tier.Limit"));
+            Shards = DataConfiguration.get("Tier.Shards");
           }
-          PreventBlockUser = new PreventUser(Player.getName(), DataHash, ShopNode, TierHash);
+          PreventBlockUser = new PreventUser(Player.getName(), DataHash, ShopNode, TierHash, Shards);
         }
       case "reset":
       case "give":
@@ -337,7 +348,7 @@ function main() {
         Player.sendMessage(ChatColor[ColorParam]('&', Message)); return 0;
       case "condense":
       case "compress":
-        var PlayerUserData = Player.getMetadata("playerData").get(0).value();
+        var PlayerUserData = Player.getMetadata("playerData").get(0).value(); var Rolls = 0;
         Player.sendMessage(LanguageManager.getScriptMessage("compressAllBeign"));
         if(args[1].toLowerCase() == "all") {
           for(var j = 0; j < 7; j++) {
@@ -350,6 +361,7 @@ function main() {
                 var CraftingGrid = PreventCore.getCraftedAmount(StorageCount,
                   PreventBlockUser.getMultiplier(PreventBlockUser.getCurrentPrestige()));
                 GeneratedBlocks = CraftingGrid[0]; RemainOres = CraftingGrid[1];
+                Rolls += Math.floor(GeneratedBlocks / 64);
                 PlayerUserData.setBlock(PreventHopperKey, RemainOres);
                 PreventBlockUser.setBlockCount(PreventBlockUser.getBlockCount() + GeneratedBlocks);
                 PreventBlockUser.addPrestigeEXP(GeneratedBlocks);
@@ -369,7 +381,27 @@ function main() {
               "&f &f &f- " + LanguageManager['notEnoughMinerals'].replace("%type%", PreventCore.translateKey(PreventCore))));
               continue;
             }
-          }; return 1;
+          }
+          if(Rolls > 0) {
+            var Bonus = Math.floor(Math.pow(PreventBlockUser.getCurrentPrestige(), 2));
+            var ObtainedShards = 0;
+            var Randomization = Java.extend(Runnable, {
+              run: function() {
+                // Shards: A special item required to prestige in PreventBlock
+                // Obtained by: Compressing blocks
+                // Drop rate: 0.01%
+                for(var x = 0; x < Math.floor((Rolls + Bonus) / PreventBlockUser.getMultiplier()); x++) {
+                  var I1 = Math.floor(Math.random() * 100) + 1;
+                  var I2 = Math.floor(Math.random() * 100) + 1;
+                  if(I1 == I2) ObtainedShards += 1;
+                  var BitRand = Math.floor(Math.random() * 200) + 1;
+                  if((I1 << 1) == BitRand || (I2 << 1) == BitRand) ObtainedShard *= 10;
+                }
+                var ShardBalance = PreventBlockUser.getShards();
+                PreventBlockUser.setShards(Math.floor(ShardBalance + ObtainedShards));
+              }
+            }); Scheduler.runTask(Host, new Randomization());
+          } return 1;
         } else if(PreventCore.shortcuts.indexOf(args[1].toLowerCase()) != -1) {
           var Input = args[2].toLowerCase();
           var HopperKey = PreventCore.assignKey(Input, true);
@@ -710,21 +742,26 @@ function main() {
   } catch(err) {
     return LanguageManager.prefix + err.name;
   } finally {
-    var PlayerFile = new File(ScriptHost + Player.getUniqueId().toString().concat(".yml"));
-    if(!PlayerFile.exists()) PlayerFile = PreventCore.setupDefaultFile(PlayerFile);
-    var SavedConfiguration = YamlConfiguration.loadConfiguration(PlayerFile);
-    SavedConfiguration.set("Owner", Player.getName());
-    SavedConfiguration.set("Tier.Allow", PreventBlockUser.getAllowPrestige());
-    SavedConfiguration.set("Tier.Level", PreventBlockUser.getCurrentPrestige());
-    SavedConfiguration.set("Tier.EXP", PreventBlockUser.getEXP());
-    SavedConfiguration.set("Tier.Limit", PreventBlockUser.getPrestigeLimit());
-    SavedConfiguration.set("Merchant.Enabled", PreventBlockUser.isOpenMerchant());
-    var MerchantKey = "Merchant."; var StorageKey = "BlockData.";
-    for each(var BlockName in PreventCore.blockKeys(false)) {
-      SavedConfiguration.set(StorageKey.concat(BlockName), PreventBlockUser.getBlockCount(BlockName));
-      if(PreventBlockUser.isOpenMerchant())
-        SavedConfiguration.set(MerchantKey.concat(BlockName), PreventBlockUser.getShopStatus(BlockName));
-    }; SavedConfiguration.save(PlayerFile);
+    var DataSaveEvent = Java.extend(Runnable, {
+      run: function() {
+        var PlayerFile = new File(ScriptHost + Player.getUniqueId().toString().concat(".yml"));
+        if(!PlayerFile.exists()) PlayerFile = PreventCore.setupDefaultFile(PlayerFile);
+        var SavedConfiguration = YamlConfiguration.loadConfiguration(PlayerFile);
+        SavedConfiguration.set("Owner", Player.getName());
+        SavedConfiguration.set("Tier.Allow", PreventBlockUser.getAllowPrestige());
+        SavedConfiguration.set("Tier.Level", PreventBlockUser.getCurrentPrestige());
+        SavedConfiguration.set("Tier.EXP", PreventBlockUser.getEXP());
+        SavedConfiguration.set("Tier.Limit", PreventBlockUser.getPrestigeLimit());
+        SavedConfiguration.set("Tier.Shards", PreventBlockUser.getShards());
+        SavedConfiguration.set("Merchant.Enabled", PreventBlockUser.isOpenMerchant());
+        var MerchantKey = "Merchant."; var StorageKey = "BlockData.";
+        for each(var BlockName in PreventCore.blockKeys(false)) {
+          SavedConfiguration.set(StorageKey.concat(BlockName), PreventBlockUser.getBlockCount(BlockName));
+          if(PreventBlockUser.isOpenMerchant())
+            SavedConfiguration.set(MerchantKey.concat(BlockName), PreventBlockUser.getShopStatus(BlockName));
+        }; SavedConfiguration.save(PlayerFile);
+      }
+    }); Scheduler.runTask(Host, new DataSaveEvent());
   }
 }
 // Execute core
