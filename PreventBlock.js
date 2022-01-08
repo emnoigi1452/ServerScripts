@@ -89,7 +89,11 @@ var LanguageManager = {
   sendComplete: "&fĐã gửi cho &e%target% &a%amount% %type%&f!",
   sendReceive: "&fĐã nhận được &a%amount% %type% &ftừ &e%send%",
   sellComplete: "&fĐã bán &a%amount% %type%&f. Bạn nhận được &a$%money%&f!",
-  helpDisplay: "&fĐang hiển thị bảng trợ giúp cho &bPreventBlock&f!"
+  helpDisplay: "&fĐang hiển thị bảng trợ giúp cho &bPreventBlock&f!",
+  maxPrestige: "&fBạn đã đạt đến giới hạn nâng cấp kho chứa!",
+  notEnoughXP: "&fBạn không có đủ kinh nghiệm để tiến hành nâng cấp kho!",
+  notEnoughShards: "&fBạn không có đủ &6Mảnh vỡ Đột Phá &fđể tiến hành lên cấp!",
+  prestigeComplete: "&fĐột phá cấp độ kho thành công! Hiện đạt cấp &a%level%&f!";
 }
 
 var PreventCore = {
@@ -169,13 +173,16 @@ function PreventUser(name, data, market, marketmanager, tierhandler, shards) {
   this.shopconfig = marketmanager;
   this.tierhandler = tierhandler;
   this.shards = shards;
-  this.getUserName() = function() {
+  this.getUserName = function() {
     return this.userName;
   }
-  this.isOpenMerchant() = function() {
+  this.isOpenMerchant = function() {
     return this.merchant;
   },
-  this.getShopStatus() = function(key) {
+  this.setMerchantStatus = function(bool) {
+    this.merchant = bool;
+  }
+  this.getShopStatus = function(key) {
     if(!this.merchant) return this.merchant;
     if(PreventCore.blockKeys(false).contains(key)) {
       return this.shopconfig.get(key);
@@ -187,6 +194,11 @@ function PreventUser(name, data, market, marketmanager, tierhandler, shards) {
   this.getCurrentPrestige = function() {
     return this.tierhandler.get("Level");
   },
+  this.setPrestige = function(level) {
+    if(isNaN(level) || (level < 1 || level > 10))
+      throw LanguageManager['invalidInt'];
+    this.tierhandler.put("Level", level);
+  }
   this.getPrestigeEXP = function() {
     return this.tierhandler.get("EXP");
   },
@@ -198,6 +210,11 @@ function PreventUser(name, data, market, marketmanager, tierhandler, shards) {
         }
       } else throw LanguageManager['invalidInt'];
     }
+  },
+  this.setPrestigeXP = function(amount) {
+    if(isNaN(amount) || amount > 1000000)
+      throw LanguageManager['invalidInt'];
+    this.tierhandler.put("XP", amount);
   }
   this.getPrestigeLimit = function() {
     return this.tierhandler.get("Limit");
@@ -232,6 +249,15 @@ function PreventUser(name, data, market, marketmanager, tierhandler, shards) {
       throw LanguageManager['invalidInt'];
     else this.shards = Math.abs(amount);
   }
+  this.getPrestigeShards = function(tier) {
+    var ShardArray = [];
+    for(var z = 1; z < 11; z++)
+      ShardArray.push(Math.floor(Math.sqrt(25*z)) << (z % 4));
+    // Sort algorithm i got on stackoverflow, lmao
+    ShardArray.sort(function(x,y) {
+      return x-y;
+    }); return ShardArray[tier-1];
+  },
 }
 
 function main() {
@@ -293,7 +319,14 @@ function main() {
             TierHash.put("EXP", DataConfiguration.get("Tier.EXP"));
             TierHash.put("Limit", DataConfiguration.get("Tier.Limit"));
             Shards = DataConfiguration.get("Tier.Shards");
-          }
+          }; var HighestEntry = 0;
+          for each(var Entry in Player.getEffectivePermissions()) {
+            var PermissionValue = Entry.getPermission();
+            if(PermissionValue.toLowerCase().search(/^(pb.limit.\d{1,2})$/g) == 0) {
+              EntryValue = parseInt(PermissionValue.split(".")[2]);
+              HighestEntry = HighestEntry > EntryValue ? HighestEntry : EntryValue;
+            }
+          }; TierHash.put("Limit", HighestEntry);
           PreventBlockUser = new PreventUser(Player.getName(), DataHash, ShopNode, TierHash, Shards);
         }
       case "reset":
@@ -398,7 +431,7 @@ function main() {
                   if((I1 << 1) == BitRand || (I2 << 1) == BitRand) ObtainedShard *= 10;
                 }
                 var ShardBalance = PreventBlockUser.getShards();
-                PreventBlockUser.setShards(Math.floor(ShardBalance + ObtainedShards));
+                PreventBlockUser.setShards(Math.floor(ShardBalance +  ObtainedShards));
               }
             }); Scheduler.runTask(Host, new Randomization());
           } return 1;
@@ -736,8 +769,36 @@ function main() {
           }
         }); Scheduler.runTask(Host, new SellTask()); return 0;
       case "up-prestige":
-        // Set up a system to obtain 'Shards', which are used to prestige in PreventBlock
-        break;
+        var Current = PreventBlockUser.getCurrentPrestige();
+        if(Current == PreventBlockUser.getPrestigeLimit()) {
+          Player.sendMessage(LanguageManager.getScriptMessage("maxPrestige"))
+          return 0;
+        } else {
+          var CurrentXP = PreventBlockUser.getPrestigeEXP();
+          var RequiredXP = PreventBlockUser.getPrestigePrice(Current+1);
+          if(CurrentXP < RequiredXP) {
+            Player.sendMessage(LanguageManager.getScriptMessage("notEnoughXP"));
+            return 0;
+          }
+          var Shards = PreventBlockUser.getShards();
+          var RequiredShards = PreventBlockUser.getPrestigeShards(Current+1);
+          if(Shards < RequiredShards) {
+            Player.sendMessage(LanguageManager.getScriptMessage("notEnoughShards"))
+            return 0;
+          }
+          var PrestigeTask = Java.extend(Runnable, {
+            run: function() {
+              PreventBlockUser.setMerchantStatus(false);
+              PreventBlockUser.setPrestigeXP(0);
+              PreventBlockUser.setPrestige(Current+1);
+              PreventBlockUser.setShards(Shards - RequiredShards);
+              for each(var BlockType in PreventCore.blockKeys(false))
+                PreventBlockUser.setBlockCount(BlockType, 0);
+              Player.sendMessage(LanguageManager.getScriptMessage("prestigeComplete")
+              .replace("%level%", (Current+1).toString()));
+            }
+          }); Scheduler.runTask(Host, new PrestigeTask()); return 0;
+        }
     }
   } catch(err) {
     return LanguageManager.prefix + err.name;
