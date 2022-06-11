@@ -41,3 +41,71 @@ PlatinumKnight:
     - basedamage{m=0.6,ia=true,pi=true} @target ~onAttack 0.25 
     - explosion{y=1.5} @target ~onDamaged 0.1
     - lunge{v=7} @self ~onAttack 0.1
+Platinum:
+  Type: WITHER_SKELETON
+  Health: 67500
+  Damage: 100
+  Defense: 50
+  LevelModifiers:
+    Health: 8750
+    Damage: 35
+    Defense: 7
+  Display: '&8[&fLv. &e<caster.level>&8] &5Shirogane'
+  BossBar:
+    Enabled: true
+    Title: '&8&8[&fLv. &e<caster.level>&8] &5白金 &f- &9Abyssal &eGlory'
+    Range: 50
+    Color: PURPLE
+    Style: SOLID
+  KillMessages:
+    - "&9Abyssal &3| &f&oMột giấc mơ đã tàn, một cơ hội vụt tắt..Tạm biệt &a&o<target.name>"
+    - "&9Abyssal &3| &f&oRơi sâu vào vực thẳm, đắm chìm trong tuyệt vọng. Vĩnh biệt &a&o<target.name>"
+    - "&9Abyssal &3| &f&oLiệu nỗi đau không thể thuyết phục con người sao? &a&o<target.name>"
+    - "&9Abyssal &3| &a&o<target.name>&f&o, cho ta biết, tại sao ngươi bám vào thứ hi vọng mơ hồ..?"
+  AIGoalSelectors:
+    - clear
+    - randomstroll
+    - meleeattack
+  AITargetSelectors:
+    - clear
+    - attacker
+    - players
+  Equipment:
+    - PlatinumCirclet HEAD
+    - PlatinumBlock CHEST
+    - PlatinumLegs LEGS
+    - PlatinumSocks FEET
+    - PlatinumSword HAND
+  Options:
+    AlwaysShowName: true
+    Collidable: false
+    Despawn: false
+    FollowRange: 60
+    KnockbackResistance: 1
+    MaxCombatDistance: 45
+    MovementSpeed: 0.5
+    PreventOtherDrops: true
+    PreventRandomEquipment: true
+    RepeatAllSkills: true
+  Skills:
+    # Spawning
+    - ignite{d=300} @PIR{r=45} ~onSpawn 0.8
+    - potion{t=BLINDNESS;d=600;l=4;p=false} @PIR{r=40} ~onSpawn 0.5
+    - potion{t=WITHER;d=900;l=9;p=false} @PIR{r=50} ~onSpawn 0.4
+    - pull{v=15;to=true} @PIR{r=30} ~onSpawn 1
+    # Looping phase 1
+    - explosion{y=5} @PIR{r=10} ~onAttack >=50%
+    - basedamage{m=0.4;ia=true;pi=true} @PIR{r=10} ~onAttack =75%-100% 0.45
+    - basedamage{m=0.6;ia=true;pi=true} @PIR{r=20} ~onAttack =50%-74% 0.55
+    - skill{s=PlatinumPhase1} ~onTimer:600 =50%-95%
+    # Phase 2 + 3
+    - healpercent{m=0.1} @self ~onTimer:60 <=80%
+    - skill{s=PlatinumPhase2} ~onTimer:600 =30%-49%
+    - basedamage{m=0.75;ia=true;pi=true} ~onDamaged =30%-50% 0.3
+    - basedamage{m=0.8;ia=true;pi=true} ~onAttack=30%-50% 0.3
+    - explosion{y=15} @PIR{r=10} ~onAttack =30%-50%
+    - skill{s=PlatinumPhase3} ~onTimer:600 <30%
+    - explosion{y=25} @PIR{r=10} ~onAttack <30%
+    - pull{v=10;to=true} @PIR{r=25} ~onTimer:1200 0.5 <45%
+    # Death
+    - message{m="&bPlatinum &3| &f&oLiệu, ta đã bước sai hướng, từ lúc nào?..."} @PIR{r=75} ~onDeath
