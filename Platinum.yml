@@ -13,9 +13,7 @@ PlatinumKnight:
     - "&bPlatinum &3| &fĐiều gì khiến ngươi cố gắng? &a<target.name>"
     - "&bPlatinum &3| &fLiệu kiên trì có dẫn ngươi tới cái chết? &a<target.name>" 
   AIGoalSelectors:
-    - clear
     - meleeattack
-    - randomstroll
   AITargetSelectors:
     - clear
     - player
