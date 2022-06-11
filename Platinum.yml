@@ -105,7 +105,7 @@ Platinum:
     - skill{s=PlatinumPhase3} ~onTimer:600 <30%
     - explosion{y=25} @PIR{r=10} ~onAttack <30%
     - basedamage{m=0.8;ia=true;pi=true} @target ~onDamaged <30% 0.6
-    - shootskull{y=12.5} @target ~onDamaged <35% 0.75
+    - shootskull{y=17.5} @target ~onTimer:60 <35% 0.75
     - basedamage{m=1;ia=true;pi=true} @target ~onTimer:300 <50%
     - basedamage{m=3;ia=false;pi=true} @PIR{r=25} ~onTimer:600 <60%
     - summon{t=PlatinumKnight;a=1;l=71} @self ~onTimer:50 <40%
