@@ -95,14 +95,14 @@ Platinum:
     - pull{v=15;to=true} @PIR{r=30} ~onSpawn 1
     # Looping phase 1
     - explosion{y=5} @PIR{r=10} ~onAttack >=50%
-    - basedamage{m=0.4;ia=true;pi=true} @PIR{r=10} ~onAttack =75%-100% 0.45
-    - basedamage{m=0.6;ia=true;pi=true} @PIR{r=20} ~onAttack =50%-74% 0.55
+    - basedamage{m=0.4;ia=true;pi=true} @PIR{r=10} ~onAttack =75%-100%
+    - basedamage{m=0.6;ia=true;pi=true} @PIR{r=20} ~onAttack =50%-74%
     - skill{s=PlatinumPhase1} ~onTimer:600 =50%-95%
     # Phase 2 + 3
-    - healpercent{m=0.1} @self ~onTimer:60 <=80%
+    - healpercent{m=0.05} @self ~onTimer:100 <=80%
     - skill{s=PlatinumPhase2} ~onTimer:600 =30%-49%
-    - basedamage{m=0.75;ia=true;pi=true} ~onDamaged =30%-50% 0.3
-    - basedamage{m=0.8;ia=true;pi=true} ~onAttack=30%-50% 0.3
+    - basedamage{m=0.75;ia=true;pi=true} ~onDamaged =30%-50% 0.8
+    - basedamage{m=0.8;ia=true;pi=true} ~onAttack=30%-50%
     - explosion{y=15} @PIR{r=10} ~onAttack =30%-50%
     - skill{s=PlatinumPhase3} ~onTimer:600 <30%
     - explosion{y=25} @PIR{r=10} ~onAttack <30%
