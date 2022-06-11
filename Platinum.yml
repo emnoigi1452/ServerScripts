@@ -97,14 +97,16 @@ Platinum:
     - basedamage{m=0.6;ia=true;pi=true} @target ~onAttack =50%-74%
     - skill{s=PlatinumPhase1} ~onTimer:600 =50%-95%
     # Phase 2 + 3
-    - healpercent{m=0.05} @self ~onTimer:100 <=80%
+    - healpercent{m=0.05} @self ~onTimer:500 <=80%
     - skill{s=PlatinumPhase2} ~onTimer:600 =30%-49%
     - basedamage{m=0.75;ia=true;pi=true} @PIR{r=30} ~onDamaged =30%-50% 0.8
-    - basedamage{m=0.8;ia=true;pi=true} @target ~onAttack=30%-50%
+    - basedamage{m=0.8;ia=true;pi=true} @target ~onAttack =30%-50%
     - explosion{y=15} @PIR{r=10} ~onAttack =30%-50%
     - skill{s=PlatinumPhase3} ~onTimer:600 <30%
     - explosion{y=25} @PIR{r=10} ~onAttack <30%
-    - summon{s=PlatinumKnight;a=1;l=71} @self ~onTimer:50 <=40%
-    - pull{v=10;to=true} @PIR{r=25} ~onTimer:1200 0.5 <45%
+    - basedamage{m=1;ia=true;pi=true} @target ~onTimer:300 <50%
+    - basedamage{m=2;ia=false;pi=true} @PIR{r=25} ~onTimer:600 <60%
+    - summon{s=PlatinumKnight;a=1;l=71} @self ~onTimer:50 <40%
+    - pull{v=10;to=true} @PIR{r=25} ~onTimer:300 <45% 0.7
     # Death
     - message{m="&bPlatinum &3| &f&oLiệu, ta đã bước sai hướng, từ lúc nào?..."} @PIR{r=75} ~onDeath
