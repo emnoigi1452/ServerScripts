@@ -1,12 +1,12 @@
 PlatinumKnight:
   Type: BABY_ZOMBIE
-  Health: 450
-  Damage: 15
-  Defense: 10
+  Health: 550
+  Damage: 25
+  Defense: 17.5
   LevelModifiers:
-    Health: 150
-    Damage: 5
-    Defense: 0.5
+    Health: 137.5
+    Damage: 6.25
+    Defense: 3.5
   Display: '&8[&fLv. &e<caster.level>&8] &fKị sĩ &bBạch Kim'
   KillMessages:
     - "&bPlatinum &3| &fTất cả vì ước mơ của đấng tối cao, tan biến đi..&a<target.name>"
@@ -41,13 +41,13 @@ PlatinumKnight:
     - lunge{v=7} @self ~onAttack 0.1
 Platinum:
   Type: WITHER_SKELETON
-  Health: 67500
-  Damage: 100
-  Defense: 50
+  Health: 75000
+  Damage: 150
+  Defense: 75
   LevelModifiers:
     Health: 8750
-    Damage: 35
-    Defense: 7
+    Damage: 37.5
+    Defense: 18.75
   Display: '&8[&fLv. &e<caster.level>&8] &5Shirogane'
   BossBar:
     Enabled: true
