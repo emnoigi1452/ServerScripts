@@ -1,0 +1,89 @@
+PlatinumPhase1:
+  Cooldown: 30
+  Skills:
+    - randommessage{
+      m=
+      "&9Abyssal &3| &f&oNào, hãy cho ta thấy thứ con người gọi là hi vọng đi!",
+      "&9Abyssal &3| &f&oVực thẳm mang theo tiếng gào thét của những kẻ đã ra đi",
+      "&9Abyssal &3| &f&oĐiều gì lôi kéo con người vào những thứ mơ hồ?",
+      "&9Abyssal &3| &f&oĂn mòn đi những điều viển vông, những giấc mơ vô nghĩa...",
+      "&9Abyssal &3| &f&oTại sao ngươi lại níu kéo những thứ vô nghĩa?"; } @PIR{r=25}
+    - effect:lightning @self
+    - effect:particlering{particle=redstone;p=150;r=15;vs=2.5;color=#483d8b;speed=7} @self
+    - explosion{y=20} @target
+    - delay 100
+    - effect:particlering{particle=redstone;p=150;r=15;vs=2.5;color=#324ab2;speed=6} @self
+    - shootskull{y=10} @PIR{r=25}
+    - delay 20
+    - shootfireball{y=10;v=4} @target
+    - delay 140
+    - effect:particlering{particle=redstone;p=150;r=15;vs=2.5;color=#120a8f;speed=6} @self
+    - swap @target
+    - prison{m=STAINED_GLASS;d=140} @target 0.1
+    - delay 100
+    - effect:particlering{particle=redstone;p=150;r=15;vs=2.5;color=#003399;speed=6} @self
+    - stun{d=100;cocw=true;cot=true;f=true} @target
+    - delay 5
+    - stun{d=60;cocw=true;cot=true} @PIR{r=15}
+    - potion{t=BLINDNESS;d=600;l=9} @PIR{r=20}
+    - potion{t=POISON;d=600;l=9} @PIR{r=25}
+    - potion{t=SLOWNESS;d=600;l=9} @PIR{r=30}
+    - delay 60
+PlatinumPhase2:
+  Cooldown: 25
+  Skills:
+    - effect:flames @PIR{r=30}
+    - effect:ender @PIR{r=35}
+    - randommessage{
+      m=
+      "&1Void &3| &f&oTan rã ra cùng với những hạt bụi trên nền trời...",
+      "&1Void &3| &f&oBước đi cuối cùng trên thế giới này...",
+      "&1Void &3| &f&oĐưa tất cả trở về nơi mọi thứ bắt đầu...",
+      "&1Void &3| &f&oHãy chết hết ở nơi này, hãy tan biến vào không trung..."; } @PIR{r=25}
+    - effect:explosion @self
+    - summon{t=PlatinumKnight;a=4;l=67} @self
+    - throw{v=1;vy=5} @PIR{r=9}
+    - delay 20
+    - basedamage{m=0.2;ia=true;pi=true} @PIR{r=30}
+    - delay 100
+    - stun{d=100;cocw=true;cot=true;f=true} @PIR{r=25}
+    - delay 10
+    - potion{t=WITHER;d=300;l=9} @PIR{r=30}
+    - delay 200
+    - prison{m=STAINED_GLASS;d=160} @PIR{r=25}
+PlatinumPhase3:
+  Cooldown: 20
+  Skills:
+    - effect:explosion @self
+    - effect:flames @PIR{r=30}
+    - swap @target
+    - delay 40
+    - effect:lightning @PIR{r=25}
+    - delay 20
+    - pull{v=8;vy=1} @PIR{r=30}
+    - delay 20
+    - explosion{y=10} @self 0.8
+    - delay 60
+    - shootfireball{y=20;v=6} @target
+    - delay 10
+    - potion{t=WITHER;d=300;l=9} @PIR{r=20}
+    - delay 10
+    - potion{t=POISON;d=300;l=9} @PIR{r=20}
+    - delay 10
+    - potion{t=BLINDNESS;d=300;l=9} @PIR{r=20}
+    - delay 10
+    - potion{t=SLOWNESS;d=300;l=9} @PIR{r=20}
+    - delay 40
+    - summon{t=PlatinumKnight;a=8;l=84} @self
+    - randommessage{
+      m=
+      "&1Void &3| &f&oTan rã ra cùng với những hạt bụi trên nền trời...",
+      "&1Void &3| &f&oBước đi cuối cùng trên thế giới này...",
+      "&1Void &3| &f&oĐưa tất cả trở về nơi mọi thứ bắt đầu...",
+      "&1Void &3| &f&oHãy chết hết ở nơi này, hãy tan biến vào không trung..."; } @PIR{r=25}
+    - delay 20
+    - basedamage{m=1.2;ia=true;pi=true} @PIR{r=10}
+    - delay 20
+    - basedamage{m=2.5;ia=false;pi=true} @PIR{r=20}
+    - delay 20
+    - prison{m=STAINED_GLASS;d=200} @PIR{r=20}
