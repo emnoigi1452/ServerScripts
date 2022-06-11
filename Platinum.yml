@@ -1,0 +1,43 @@
+PlatinumKnight:
+  Type: BABY_ZOMBIE
+  Health: 450
+  Damage: 15
+  Defense: 10
+  LevelModifiers:
+    Health: 150
+    Damage: 5
+    Defense: 0.5
+  Display: '&8[&fLv. &e<caster.level>&8] &fKị sĩ &bBạch Kim'
+  KillMessages:
+    - "&bPlatinum &3| &fTất cả vì ước mơ của đấng tối cao, tan biến đi..&a<target.name>"
+    - "&bPlatinum &3| &fĐiều gì khiến ngươi cố gắng? &a<target.name>"
+    - "&bPlatinum &3| &fLiệu kiên trì có dẫn ngươi tới cái chết? &a<target.name>" 
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - randomstroll
+  AITargetSelectors:
+    - clear
+    - player
+    - attacker
+  Options:
+    Collidable: false
+    FollowRange: 25
+    KnockbackResistance: 0.4
+    MaxCombatDistance: 30
+    MovementSpeed: 0.25
+    PreventOtherDrops: true
+    PreventRandomEquipment: true
+    RepeatAllSkills: true
+  Equipment:
+    - PlatinumBlade HAND
+    - PlatinumHelmet HEAD
+    - PlatinumChestplate CHEST
+    - PlatinumLeggings LEGS
+    - PlatinumBoots FEET
+  Skills:
+    - pull{v=5;to=true} @NearestPlayer{r=20} ~onSpawn
+    - shootskull{y=4.5} @target ~onDamaged 0.15
+    - basedamage{m=0.6,ia=true,pi=true} @target ~onAttack 0.25 
+    - explosion{y=1.5} @target ~onDamaged 0.1
+    - lunge{v=7} @self ~onAttack 0.1
