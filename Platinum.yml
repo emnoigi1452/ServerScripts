@@ -35,9 +35,9 @@ PlatinumKnight:
     - PlatinumBoots FEET
   Skills:
     - pull{v=5;to=true} @NearestPlayer{r=20} ~onSpawn
-    - shootskull{y=4.5} @target ~onDamaged 0.15
+    - shootskull{y=7.5} @target ~onTimer:60 0.8
     - basedamage{m=0.6,ia=true,pi=true} @target ~onAttack 0.25 
-    - explosion{y=1.5} @target ~onDamaged 0.1
+    - explosion{y=12.5} @target ~onTimer:100
     - lunge{v=7} @self ~onAttack 0.1
 Platinum:
   Type: WITHER_SKELETON
