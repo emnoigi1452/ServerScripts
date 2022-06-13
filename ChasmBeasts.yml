@@ -1,0 +1,100 @@
+ChasmicZombies:
+  Type: ZOMBIE
+  Health: 30
+  Damage: 3
+  Defense: 1
+  LevelModifier:
+    Health: 6
+    Damage: 0.6
+    Defense: 0.2
+  Display: '&8[&eLv. <caster.level>&8] &fXác &eThở Mỏ'
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - randomstroll
+  AITargetSelectors:
+    - clear
+    - player
+    - attacker
+  Options:
+    Collidable: true
+    FollowRange: 30
+    MaxCombatDistance: 15
+    PreventOtherDrops: true
+    PreventRandomEquipment: true
+  Equipment:
+    - MinersHelmet HEAD
+    - LEATHER_CHESTPLATE CHEST
+    - LEATHER_LEGGGINGS LEGS
+    - LEATHER_BOOTS FEET
+    - STONE_PICKAXE HAND
+  Drops:
+    - exp 30-50 1
+    - money 75-125 1
+  Skills:
+    - potion{t=SLOWNESS;d=140;l=0;p=false} @target ~onAttack
+    - potion{t=HUNGER;d=200;l=0;p=false} @target ~onAttack 0.6
+ChasmicSkeletons:
+  Type: SKELETON
+  Health: 40
+  Damage: 4.5
+  Defense: 1.5
+  LevelModifier:
+    Health: 8
+    Damage: 0.9
+    Defense: 0.3
+  Display: '&8[&eLv. <caster.level>&8] &fXương Hắc Vực' # Add name pls
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - randomstroll
+  AITargetSelectors:
+    - clear
+    - player
+    - attacker
+  Equipment:
+    - ChasmHemlet HEAD
+    - CHAINMAIL_CHESTPLATE CHEST
+    - CHAINMAIL_LEGGINGS LEGS
+    - CHAINMAIL_BOOTS FEET
+    - STONE_SWORD HAND
+  Options:
+    Collidable: true
+    FollowRange: 30
+    MaxCombatDistance: 25
+    PreventOtherDrops: true
+  Drops:
+    - exp 50-70 1
+    - money 90-120 1
+  Skills:
+    - shootskull{y=2.5} @target ~onTimer:200 0.6
+    - basedamage{m=0.4;pi=true} @target ~onAttack 0.4
+ChasmicSpiders:
+  Type: CAVE_SPIDER
+  Health: 50
+  Damage: 6
+  Defense: 2
+  LevelModifier:
+    Health: 10
+    Damage: 1.2
+    Defense: 0.4
+  Display: '&8[&eLv. <caster.level>&8] &fNhện &5Vực Thẳm'
+  AIGoalSelectors:
+    - clear
+    - spiderattack
+    - randomstroll
+  AITargetSelectors:
+    - clear
+    - player
+    - attacker
+  Options:
+    Collidable: true
+    FollowRange: 20
+    MaxCombatDistance: 15
+    PreventOtherDrops: true
+  Drops:
+    - exp 80-100 1
+    - money 100-150 1
+  Skills:
+    - potion{t=POISON;d=200;l=0;p=false} @target ~onAttack
+    - basedamage{m=0.6} @target ~onTimer:40
