@@ -17,7 +17,9 @@ UndeadLeader:
     Color: RED
     Style: SOLID
   AIGoalSelectors:
+    - clear
     - meleeattack
+    - randomstroll
   AITargetSelectors:
     - clear
     - player
@@ -67,7 +69,9 @@ HauntedSkelly:
     Color: WHITE
     Style: SOLID
   AIGoalSelectors:
+    - clear
     - meleeattack
+    - randomstroll
   AITargetSelectors:
     - clear
     - player
@@ -118,7 +122,9 @@ ChasmicSpider:
     Color: WHITE
     Style: SOLID
   AIGoalSelectors:
+    - clear
     - spiderattack
+    - randomstroll
   AITargetSelectors:
     - clear
     - player
