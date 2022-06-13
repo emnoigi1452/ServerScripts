@@ -1,11 +1,11 @@
 PlatinumKnight:
   Type: BABY_ZOMBIE
-  Health: 550
-  Damage: 25
+  Health: 1250
+  Damage: 30
   Defense: 17.5
   LevelModifiers:
-    Health: 137.5
-    Damage: 6.25
+    Health: 250
+    Damage: 7.5
     Defense: 3.5
   Display: '&8[&fLv. &e<caster.level>&8] &fKị sĩ &bBạch Kim'
   KillMessages:
@@ -41,13 +41,13 @@ PlatinumKnight:
     - lunge{v=7} @self ~onAttack 0.1
 Platinum:
   Type: WITHER_SKELETON
-  Health: 75000
-  Damage: 150
+  Health: 50000
+  Damage: 160
   Defense: 75
   LevelModifiers:
-    Health: 8750
-    Damage: 37.5
-    Defense: 18.75
+    Health: 9000
+    Damage: 40
+    Defense: 7.5
   Display: '&8[&fLv. &e<caster.level>&8] &5Shirogane'
   BossBar:
     Enabled: true
@@ -106,9 +106,10 @@ Platinum:
     - explosion{y=25} @PIR{r=10} ~onAttack <30%
     - basedamage{m=0.8;ia=true;pi=true} @target ~onDamaged <30% 0.6
     - shootskull{y=17.5} @target ~onTimer:60 <35% 0.75
-    - basedamage{m=1;ia=true;pi=true} @target ~onTimer:300 <50%
-    - basedamage{m=3;ia=false;pi=true} @PIR{r=25} ~onTimer:600 <60%
+    - basedamage{m=1;ia=true;pi=true} @target ~onTimer:300 <40%
+    - basedamage{m=3;ia=false;pi=true} @PIR{r=5} ~onTimer:900 <50%
     - summon{t=PlatinumKnight;a=1;l=71} @self ~onTimer:50 <40%
+    - rally{t=PlatinumKnight;r=30} @target ~onTimer:300 <30% 
     - pull{v=10;to=true} @PIR{r=25} ~onTimer:300 <45% 0.7
     # Death
     - message{m="&bPlatinum &3| &f&oLiệu, ta đã bước sai hướng, từ lúc nào?..."} @PIR{r=75} ~onDeath
