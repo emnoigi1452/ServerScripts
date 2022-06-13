@@ -1,0 +1,148 @@
+UndeadLeader:
+  Type: ZOMBIE
+  Health: 200
+  Damage: 20
+  Defense: 5
+  LevelModifier:
+    Health: 40
+    Damage: 4
+    Defense: 2.5
+  Display: '&4&oUndead &b&oLeader'
+  KillMessages:
+    - '&eDungeon &3| &a<target.name> &fđã bị vả vỡ hãm ở &fTầng &aI &f- &eZombies'
+  BossBar:
+    Enabled: true
+    Title: '&eLv. <caster.level> &3| &4Undead &eLeader'
+    Range: 30
+    Color: RED
+    Style: SOLID
+  AIGoalSelectors:
+    - meleeattack
+  AITargetSelectors:
+    - clear
+    - player
+    - attacker
+  Options:
+    Collidable: false
+    FollowRange: 25
+    KnockbackResistance: 0.2
+    MaxCombatDistance: 30
+    MovementSpeed: 0.25
+    PreventOtherDrops: true
+    PreventRandomEquipment: true
+    RepeatAllSkills: true
+  Equipment:
+    - LeaderCirclet HEAD
+    - LeaderPlate CHEST
+    - LeaderLeggings LEGS
+    - LeaderBoots FEET
+    - LeaderBlade HAND
+  Skills:
+    - potion{t=HUNGER;d=200;l=3;p=false} @target ~onAttack <100%
+    - basedamage{m=0.25;ia=true;pi=true} @target ~onTimer:200 =50-99%
+    - explosion{y=5} @target ~onAttack <100% 0.02
+    - shootskull{y=7.5} @target ~onTimer:200 <80%
+    - rally{t=ChasmicZombies;r=25} @trigger ~onTimer:600 <40%
+    - basedamage{m=0.5;ia=true;pi=true} @target ~onTimer:200 <50%
+  Drops:
+    - cmd{c="mi load custom DungeonZombie <trigger.name> 1"}
+    - xp 200-375 1
+    - money 500-1500 1
+HauntedSkelly:
+  Type: SKELETON
+  Health: 300
+  Damage: 25
+  Defense: 10
+  LevelModifier:
+    Health: 60
+    Damage: 6.25
+    Defense: 2.5
+  Display: '&5Cursed &4Undead'
+  KillMessages:
+    - '&eDungeon &3| &a<target.name> &fđã bay màu ở &fTầng &aII &f- &4Skeletons'
+  BossBar:
+    Enabled: true
+    Title: '&eLv. <caster.level> &3| &5Cursed &4Undead'
+    Range: 30
+    Color: WHITE
+    Style: SOLID
+  AIGoalSelectors:
+    - meleeattack
+  AITargetSelectors:
+    - clear
+    - player
+    - attacker
+  Options:
+    Collidable: false
+    FollowRange: 20
+    KnockbackResistance: 0.2
+    MaxCombatDistance: 30
+    MovementSpeed: 0.25
+    PreventOtherDrops: true
+    PreventRandomEquipment: true
+    RepeatAllSkills: true
+  Equipment:
+    - LeaderCirclet HEAD
+    - LeaderPlate CHEST
+    - LeaderLeggings LEGS
+    - LeaderBoots FEET
+    - LeaderBlade HAND
+  Skills:
+    - potion{t=WITHER;d=200;l=2;p=false} @target ~onAttack <100%
+    - basedamage{m=0.3;ia=true;pi=true} @target ~onTimer:200 =60-99%
+    - explosion{y=7} @target ~onAttack <70% 0.03
+    - arrowvolley{a=5;s=25;v=15;rd=100} @PIR{r=10} ~onAttack <70% 0.4
+    - forcepull{s=3} @PIR{r=15} @onTimer:300 <80%
+    - rally{t=ChasmicSkeletons;r=30} @trigger ~onTimer:600 <50%
+    - basedamage{m=0.6;ia=true;pi=true} @target ~onTimer:150 <60%
+  Drops:
+    - cmd{c="mi load custom DungeonSkeleton <trigger.name> 1"}
+    - xp 300-525 1
+    - money 1000-2500 1
+ChasmicSpider:
+  Type: SPIDER
+  Health: 500
+  Damage: 30
+  Defense: 15
+  LevelModifier:
+    Health: 100
+    Damage: 10
+    Defense: 3.75
+  Display: '&7Chasmic &3Spider'
+  KillMessages:
+    - '&eDungeon &3| &a<target.name> &fđã tàn đời ở &fTầng &aIII &f- &eSpiders'
+  BossBar:
+    Enabled: true
+    Title: '&eLv. <caster.level> &3| &7Chasmic &3Spider'
+    Range: 30
+    Color: WHITE
+    Style: SOLID
+  AIGoalSelectors:
+    - spiderattack
+  AITargetSelectors:
+    - clear
+    - player
+    - attacker
+  Options:
+    Collidable: false
+    FollowRange: 30
+    KnockbackResistance: 0.5
+    MaxCombatDistance: 40
+    MovementSpeed: 0.35
+    PreventOtherDrops: true
+    PreventRandomEquipment: true
+    RepeatAllSkills: true
+  Skills:
+    - potion{t=WITHER;d=200;l=4;p=false} @target ~onAttack <100%
+    - basedamage{m=0.3;ia=true;pi=true} @target ~onTimer:200 =65-99%
+    - explosion{y=7} @target ~onAttack <100% 0.05
+    - prison{m=COBWEB;d=200} @target ~onAttack <70% 0.3
+    - leap{v=150} @target ~onTimer:600
+    - effect:explosion @self ~onTimer:300
+    - stun{d=100;f=true;cot=true;cocw=true} @target ~onAttack <60%
+    - rally{t=ChasmicSpiders;r=30} @trigger ~onTimer:600 <60%
+    - basedamage{m=0.6;ia=true;pi=true} @target ~onTimer:100 <65%
+  Drops:
+    - cmd{c="mi load custom DungeonSpider <trigger.name> 1"}
+    - xp 500-875 1
+    - money 2500-5000 1
