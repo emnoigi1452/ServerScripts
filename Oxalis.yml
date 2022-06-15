@@ -1,0 +1,75 @@
+Oxalis:
+  Type: WITCH
+  Health: 60000
+  Damage: 240
+  Defense: 120
+  LevelModifier:
+    Health: 9400
+    Damage: 60
+    Defense: 20
+  Display: '&eOxalis &f&o- Forgotten Maiden'
+  KillMessages:
+    - "&4Oxalis &3| &f&oLiệu thế giới có bỏ rơi người trong giây phút cuối không, &a&o<target.name>&f&o?"
+    - "&4Oxalis &3| &f&oChết đi trong cô độc, trong đau đớn. Số phận tàn khốc, phải không &a&o<target.name>&f&o?"
+    - "&4Oxalis &3| &f&oMột lần nữa, lời nguyền giết đi người hùng của ta..."
+    - "&4Oxalis &3| &f&oGiá như, âm giới tươi đẹp hơn hiện thực tàn nhẫn của ta..."
+  BossBar:
+    Enabled: true
+    Range: 50
+    Title: '&eLv. <caster.level> &3| &c&oOxalis &f- &5&o乙女'
+    Color: PURPLE
+    Style: SOLID
+  AIGoalSelectors:
+    - clear
+    - lookatplayers
+    - meleeattack
+    - movetowardstarget
+  AITargetSelectors:
+    - clear
+    - players
+    - attacker
+  DamageModifiers:
+    - FIRE_TICK 0
+    - LAVA 0
+    - FIRE 0
+    - MAGIC -10
+    - THORNS -5
+  Options:
+    Collidable: false
+    Despawn: false
+    FollowRange: 50
+    KnockbackResistance: 1
+    MaxCombatDistance: 20
+    MovementSpeed: 0.4
+    NoDamageTicks: 20
+    PreventOtherDrops: true
+    PreventRandomEquipment: true
+    RepeatAllSkills: true
+  Skills:
+    - ignite{d=600} @PIR{r=30} ~onSpawn
+    - effect:lightning @self ~onSpawn
+    - potion{t=WITHER;d=300;l=9;p=false} @PIR{r=15} ~onSpawn 0.5
+    - sethealth{a=20} ~PIR{r=50} ~onSpawn
+    # Phase 1
+    - healpercent{m=0.01} @self ~onTimer:20 <=90%
+    - explosion{y=30} @target ~onTimer:300 <=80%
+    - shootskull{y=20} @target ~onTimer:200 =50%-80%
+    - potion{t=WEAKNESS;d=300;l=14;p=false} @target ~onTimer:1200 <=80%
+    - potion{t=BLINDNESS;d=200;l=4;p=false} @PIR{r=45} ~onTimer:900 <=75%
+    - basedamage{m=0.7;ia=true;pi=true} @PIR{r=15} ~onTimer:200 =50%-90%
+    - pull{v=5;to=true} @PIR{r=15} ~onTimer:300 =50%-95%
+    # Phase 2
+    - shootfireball{y=25;v=5;type=DRAGON} @target ~onTimer:300 =25%-49%
+    - basedamage{m=0.9;ia=true;pi=true} @PIR{r=10} ~onTimer:200 =25%-49%
+    - swap @target ~onTimer:1200 =25%-49%
+    - disengage @self ~onTimer:2400 =25%-30% 0.02
+    - potion{t=SLOW;d=300;l=9;p=false} @PIR{r=20} ~onTimer:900 =25%-45%
+    - potion{t=HUNGER;d=450;l=9;p=false} @PIR{r=30} ~onTimer:900 =25%-35%
+    - shootpotion{t=HARM;d=5;l=19;p=false} @target ~onTimer:200
+    # Phase 3
+    - shootfireball{y=40;v=10;type=DRAGON} @target ~onTimer:400 <25%
+    - basedamage{m=1.1;ia=true;pi=true} @PIR{r=5} ~onTimer:100 <25%
+    - prison{m=ICE;d=200} @PIR{r=15} ~onAttack <25% 0.2
+    - basedamage{m=0.9;ia=true;pi=true} @PIR{r=20} ~onAttack <25% 0.3
+    - sethealth{a=1} @PIR{r=40} ~onAttack <25% 0.1
+    - message{m="&4Oxalis &3| &f&oĐể sống là để đau khổ, để chết là để hối hận..."} @self ~onDeath 
