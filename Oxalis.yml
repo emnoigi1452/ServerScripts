@@ -6,7 +6,7 @@ Oxalis:
   LevelModifier:
     Health: 9400
     Damage: 60
-    Defense: 20
+    Armor: 30
   Display: '&eOxalis &f&o- Forgotten Maiden'
   KillMessages:
     - "&4Oxalis &3| &f&oLiệu thế giới có bỏ rơi người trong giây phút cuối không, &a&o<target.name>&f&o?"
@@ -19,6 +19,12 @@ Oxalis:
     Title: '&eLv. <caster.level> &3| &c&oOxalis &f- &5&o乙女'
     Color: PURPLE
     Style: SOLID
+  Equipment:
+    - PlatinumCirclet HEAD
+    - PlatinumBlock CHEST
+    - PlatinumLegs LEGS
+    - PlatinumSocks FEET
+    - PlatinumSword HAND
   AIGoalSelectors:
     - clear
     - lookatplayers
