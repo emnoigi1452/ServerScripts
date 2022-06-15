@@ -1,11 +1,11 @@
 Oxalis:
   Type: WITCH
   Health: 60000
-  Damage: 240
+  Damage: 300
   Armor: 30
   LevelModifier:
     Health: 9400
-    Damage: 60
+    Damage: 75
     Armor: 30
   Display: '&eOxalis &f&o- Forgotten Maiden'
   KillMessages:
@@ -38,7 +38,6 @@ Oxalis:
     - FIRE_TICK 0
     - LAVA 0
     - FIRE 0
-    - MAGIC -1
     - THORNS -2
   Options:
     Collidable: false
