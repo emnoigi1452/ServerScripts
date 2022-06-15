@@ -2,7 +2,7 @@ Oxalis:
   Type: WITCH
   Health: 60000
   Damage: 240
-  Defense: 120
+  Armor: 30
   LevelModifier:
     Health: 9400
     Damage: 60
