@@ -77,4 +77,4 @@ Oxalis:
     - prison{m=ICE;d=200} @PIR{r=15} ~onAttack <25% 0.2
     - basedamage{m=0.9;ia=true;pi=true} @PIR{r=20} ~onAttack <25% 0.3
     - sethealth{a=1} @PIR{r=40} ~onAttack <25% 0.1
-    - message{m="&4Oxalis &3| &f&oĐể sống là để đau khổ, để chết là để hối hận..."} @self ~onDeath 
+    - message{m="&4Oxalis &3| &f&oĐể sống là để đau khổ, để chết là để hối hận..."} @PIR{r=100} ~onDeath 
