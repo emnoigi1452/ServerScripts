@@ -38,7 +38,7 @@ Oxalis:
     - FIRE_TICK 0
     - LAVA 0
     - FIRE 0
-    - MAGIC -4
+    - MAGIC -1
     - THORNS -2
   Options:
     Collidable: false
