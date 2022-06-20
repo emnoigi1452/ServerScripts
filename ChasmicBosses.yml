@@ -95,8 +95,8 @@ HauntedSkelly:
     - potion{t=WITHER;d=200;l=2;p=false} @target ~onAttack <100%
     - basedamage{m=0.3;ia=true;pi=true} @target ~onTimer:200 =60-99%
     - explosion{y=7} @target ~onAttack <70% 0.03
-    - arrowvolley{a=5;s=25;v=15;rd=100} @PIR{r=10} ~onAttack <70% 0.4
-    - forcepull{s=3} @PIR{r=15} @onTimer:300 <80%
+    - shootskull{y=10} @target ~onAttack <65% 0.05
+    - potion{t=WEAKNESS;d=200;l=3;p=false} @target ~onAttack <80% 0.3
     - rally{t=ChasmicSkeletons;r=30} @trigger ~onTimer:600 <50%
     - basedamage{m=0.6;ia=true;pi=true} @target ~onTimer:150 <60%
   Drops:
